@@ -268,6 +268,7 @@ err_oob:
 	li $v0, 10
 	syscall
 	
+	.globl err_ut
 err_ut:
 	# Erro caso tente usar um tipo de objeto inexistente
 	li $v0, 4
@@ -276,6 +277,7 @@ err_ut:
 	
 	li $v0, 10
 	
+	.globl err_nan
 err_nan:
 	# Erro caso o caracter nao seja um numero
 	li $v0, 4
@@ -285,6 +287,7 @@ err_nan:
 	li $v0, 10
 	syscall
 	
+	.globl err_re
 err_re:
 	# Erro lendo o arquivo
 	li $v0, 4
@@ -294,6 +297,7 @@ err_re:
 	li $v0, 10
 	syscall
 
+	.globl read_map_from_file
 read_map_from_file:
 	# Le o mapa do arquivo "Map.dat" e retorna o endereco em $v0
 	
@@ -345,7 +349,6 @@ read_map_from_file:
 	addi $s6, $v1, 1
 	li $s3, 0	# x atual
 	li $s4, 0	# y atual
-	
 read_loop:
 	beq $s4, $s2, read_done
 	beq $s3, $s1, line_done
