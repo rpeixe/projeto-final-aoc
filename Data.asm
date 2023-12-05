@@ -62,18 +62,18 @@ buf_s:	.word 8196
 	
 	.text
 main:
-	jal read_map_from_file
-	move $s0, $v0
+	#jal read_map_from_file
+	#move $s0, $v0
 	
-	move $a0, $s0
-	li $a1, 6
-	li $a2, 6
-	jal get_map_obj
-	move $a0, $v0
-	jal print_object
+	#move $a0, $s0
+	#li $a1, 6
+	#li $a2, 6
+	#jal get_map_obj
+	#move $a0, $v0
+	#jal print_object
 
-	li $v0, 10	# Finaliza o programa
-	syscall
+	#li $v0, 10	# Finaliza o programa
+	#syscall
 	
 	.globl create_floor
 create_floor:
@@ -129,7 +129,7 @@ create_player:
 	sw $v0, 8($t1)
 	
 	move $v0, $t1
-		
+	
 	jr $ra
 
 	.globl create_enemy
