@@ -1,17 +1,6 @@
 	.data
 yArea:		.asciiz "Character in area\n"
 nArea:		.asciiz "No character in area\n"
-##
-oob:	.asciiz "Error: out of bounds\n"
-ut:	.asciiz "Error: unknown object type\n"
-nan:	.asciiz "Error: not a number\n"
-re:	.asciiz "Error: read error\n"
-file:	.asciiz "map.txt"
-	.align 2
-buf:	.space 8196	# Maximo 64x64
-	.align 2
-buf_s:	.word 8196
-##
 	.align 2
 indice:	.space 100
 aux:	.space 100
@@ -103,7 +92,7 @@ enemy_check_area:
    li $t5, 0
    li $t2, 2
 
-   #Checa se personagem estï¿½ na largura da enemy_area
+   #Checa se personagem estÃ¯Â¿Â½ na largura da enemy_area
    sub $t0, $t0, $a1
    sub $t0, $t0, 1
    slt $t4, $t0, $t1
@@ -264,7 +253,7 @@ enemy_move:
     
    sub $t1, $t1, $t2
    #se <0, esta na dir|se = 0, esta no mesmo indice largura|se >0, esta na esq
-   beq $t1, $zero, endLargura		#Inimigo=Personagem, mesma localização, nao precisa mover
+   beq $t1, $zero, endLargura		#Inimigo=Personagem, mesma localizaÃ§Ã£o, nao precisa mover
 	ble $t1, $zero, rightMove		#Inimigo<Personagem, mova para a direita
    ble $zero, $t1, leftMove		#Inimigo>Personagem, mova para a esquerda
    
@@ -280,7 +269,7 @@ endLargura:
    sub $t1, $t1, $t2
    #se <0, esta em baixo|se = 0, esta no mesmo indice altura|se >0, esta em cima
   
-   beq $t1, $zero, endEnemyMove	#Inimigo=Personagem, mesma localização, nao precisa mover
+   beq $t1, $zero, endEnemyMove	#Inimigo=Personagem, mesma localizaÃ§Ã£o, nao precisa mover
    ble $t1, $zero, downMove		#Inimigo<Personagem, mova para a cima
    ble $zero, $t1, upMove		#Inimigo>Personagem, mova para a esquerda
    
@@ -377,8 +366,8 @@ atack_character:
 	addi $sp, $sp, 4
 	jr $ra
 	
-	.globl remove_object
-remove_object:	#Incompleto
+	#.globl remove_object
+#remove_object:	#Incompleto
 #
 #	jr $ra
 
