@@ -1,7 +1,7 @@
 #################################################################################
 # Objeto de Jogo (12 bytes)							#
 #										#
-# Define um objeto genÃ©rico no mundo do jogo					#
+# Define um objeto genérico no mundo do jogo					#
 #										#
 # Estrutura:									#
 # Tipo - posicao 0, 4 bytes - o tipo de objeto					#
@@ -129,6 +129,7 @@ create_player:
 	sw $v0, 8($t1)
 	
 	move $v0, $t1
+		
 	jr $ra
 
 	.globl create_enemy
@@ -322,8 +323,8 @@ read_map_from_file:
 	li $v0, 13	# Abrir arquivo
 	la $a0, file	# Nome do arquivo
 	li $a1, 0	# Somente leitura
-	li $a2, 0
-	syscall
+	li $a2,0
+	syscall	
 	bltz $v0, err_re
 	
 	move $a0, $v0	# Descritor de arquivo
