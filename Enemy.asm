@@ -77,7 +77,7 @@ main:
 	li $a1, 2		#area inimigo
 	jal enemy_move	#envia mapa em $a0, area $a1 e indices em $s1
 	
-	beq $v0, 2, atack_character:	
+	beq $v0, 2, atack_character	
 	
 	move $a0, $s0
 	li $a1, 6
@@ -344,7 +344,7 @@ notInArea:
 
    jr $ra
    
-	.globl atackCharacter
+	.globl atack_character
 atack_character:
 	#Mapa $a0, atacante e atacado em $s1, em ordem ((x,y),(x,y))
 	addi $sp, $sp, -4
@@ -378,7 +378,7 @@ atack_character:
 	jr $ra
 	
 	.globl remove_object
-#remove_object:	#Incompleto
+remove_object:	#Incompleto
 #
 #	jr $ra
 
