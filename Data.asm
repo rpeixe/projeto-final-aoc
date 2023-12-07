@@ -276,6 +276,7 @@ err_ut:
 	syscall
 	
 	li $v0, 10
+	syscall
 	
 	.globl err_nan
 err_nan:
