@@ -8,17 +8,14 @@ aux:	.space 100
 	.text
 main:
 	#Teste enemy check area and move
+	jal read_map_from_file
+	move $s0, $v0
+	
 	la $s1, indice
 	la $s2, aux
-
-	li $a0, 20
-	move $a1, $a0
-	jal create_map
 	
-	move $s0, $v0
-	move $a0, $s0
-	
-	li $t0, 5
+	#just for tests
+	li $t0, 6
 	sw $t0, ($s1)
 	li $t0, 6
 	sw $t0, 4($s1)
@@ -27,22 +24,23 @@ main:
 	li $t0, 5
 	sw $t0, 12($s1)
 	
+	jal create_enemy
 	move $a0, $s0
 	lw $a1, ($s1) 
 	lw $a2, 4($s1) 
-	li $a3, 3
+	move $a3, $v0
 	jal set_map_obj
 	
+	jal create_player
 	move $a0, $s0
-	li $a1, 5
-	li $a2, 6
-	jal get_map_obj
+	lw $a1, 8($s1) 
+	lw $a2, 12($s1) 
+	move $a3, $v0
+	jal set_map_obj
+	#just for tests
 	
-	move $t1, $v0
-	li $v0, 1
-	move $a0, $t1
-	syscall
 	##########
+	move $a0, $s0
 	li $a1, 2	#area inimigo
 	jal enemy_check_area 
 
@@ -67,18 +65,18 @@ main:
 	jal enemy_move	#envia mapa em $a0, area $a1 e indices em $s1
 	
 	beq $v0, 2, atack_character	
-	
+	###########
 	move $a0, $s0
 	li $a1, 6
 	li $a2, 5
 	
 	jal get_map_obj
 	
-	move $t1, $v0
+	lw $t1, ($v0)
 	li $v0, 1
 	move $a0, $t1
 	syscall
-	
+	############
 	li $v0, 10	# Fim
 	syscall
 
@@ -148,7 +146,8 @@ move_character:
    beq $a3, 6, right
    beq $a3, 7, leftUp
    beq $a3, 8, up
-   beq $a3, 8, rightUp
+   beq $a3, 9, rightUp
+   j err_ind
     
 leftDown:	#sw $a1, ($s1)
    sub $t1, $a1, 1
@@ -203,7 +202,8 @@ ExitMove_character:
    move $a2, $t2
    jal get_map_obj
     
-   beq $v0, 0, canMove
+   lw $t1, 4($v0)
+   beq $t1, 0, canMove
     
    li $v0, 0     #flag impossivel de mover
     
@@ -244,7 +244,7 @@ enemy_move:
    beq $v0, 0, endEnemyMove		#notInArea
    
    li $a1, 1
-	jal enemy_check_area		#se estiver em uma area de distancia, ataque
+	jal enemy_check_area		#se estiver em uma area 1, ataque
 	bne $v0, 0, enemyCanAtack
     
    #largura
@@ -272,12 +272,6 @@ endLargura:
    beq $t1, $zero, endEnemyMove	#Inimigo=Personagem, mesma localização, nao precisa mover
    ble $t1, $zero, downMove		#Inimigo<Personagem, mova para a cima
    ble $zero, $t1, upMove		#Inimigo>Personagem, mova para a esquerda
-   
-endEnemyMove:
-   lw $ra, ($sp)
-	addi $sp, $sp, 8
-	
-   jr $ra
 
 rightMove:
 	move $a0, $s0		#coloca em a0 o mapa salvo em $s0
@@ -326,6 +320,12 @@ downMove:
 	jal move_character
 
 	j endEnemyMove
+   
+endEnemyMove:
+   lw $ra, ($sp)
+	addi $sp, $sp, 8
+	
+   jr $ra
 
 	.globl notInArea
 notInArea:
@@ -334,41 +334,88 @@ notInArea:
    jr $ra
    
 	.globl atack_character
+	
 atack_character:
-	#Mapa $a0, atacante e atacado em $s1, em ordem ((x,y),(x,y))
+	#Mapa $a0, atacante e defensor em $s1, em ordem ((x,y),(x,y))
 	addi $sp, $sp, -4
 	sw $ra, ($sp)
 
 	move $a0, $s0
 	lw $a1, ($s1)
 	lw $a2, 4($s1)
-	jal get_map_index
+	jal get_map_obj
 	
-	lw $t0, 8($v0)	#ataque
+	lw $t3, 8($v0)
+	lw $t0, 8($t3)	#ataque
 	move $s2, $t0
 	
 	move $a0, $s0
 	lw $a1, 8($s1)
 	lw $a2, 12($s1)
-	jal get_map_index
+	jal get_map_obj
 	
-	lw $t1, 8($v0)	#defesa
-	lw $t2, ($v0)	#vida atual
+	li $t1, 0
+	lw $t3, 8($v0)
+ 	#lw $t1, 12($v0)	#defesa	
+	lw $t2, ($t3)	#vida atual
 	move $t0, $s2
 	
-	sub $t1, $t1, $t0
-	add $t2, $t2, $t1
+	sub $t0, $t0, $t1	
+	sub $t2, $t2, $t0
 	
-	#beq $t2, 0, remove_object	#caso vida = 0 remova do mapa/memoria
-	sw $t2, ($v0)
+	beq $t2, 0, remove_defender	#caso vida = 0 remova do mapa/memoria
+	
+	sw $t2, ($t3)	#ataualiza vida
+	sw $t3, 8($v0)
+	
+	move $a0, $s0
+	lw $a1, 8($s1)
+	lw $a2, 12($s1)
+	move $a3, $v0
+	jal set_map_obj
+
+	end_attack_character:
 
 	lw $ra, ($sp)
 	addi $sp, $sp, 4
 	jr $ra
 	
-	#.globl remove_object
-#remove_object:	#Incompleto
-#
-#	jr $ra
+remove_defender:
+	
+	move $a0, $s0
+	lw $a1, 8($s1)
+	lw $a2, 12($s1)
+	move $a3, $v0
+	jal remove_object
+	
+	lw $a1, 8($s1)
+	lw $a2, 12($s1)
+	
+	j end_attack_character
+	
+	.globl remove_object
+remove_object:	
+	#mapa em $a0, o objeto a ser removido em $a3, e o indice em $a1, $a2
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	
+	li $t1, 0
+	li $t2, 2
+	
+	lw $t3, ($a3)
+	
+	beq $t3, $t2, game_over		#caso esteja removendo player
 
-#################################
+	lw $t3, 8($a3)
+	sw $t1, ($t3)
+	sw $t1, 4($t3)
+	sw $t1, 8($t3)
+	sw $t3, 8($a3)
+	sw $t1, ($a3)		#trasforma o objeto em chao
+	
+	jal set_map_obj
+	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
+	
+	jr $ra
