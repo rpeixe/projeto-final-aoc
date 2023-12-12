@@ -54,7 +54,10 @@ oob:	.asciiz "Error: out of bounds\n"
 ut:	.asciiz "Error: unknown object type\n"
 nan:	.asciiz "Error: not a number\n"
 re:	.asciiz "Error: read error\n"
+wi:	.asciiz "Error: wrong index\n"
+wc:	.asciiz "Wrong character, type again"
 file:	.asciiz "map.txt"
+rest: .asciiz "Press r to restart the game or q to quit\n"
 	.align 2
 buf:	.space 8196	# Maximo 64x64
 	.align 2
@@ -68,7 +71,7 @@ main:
 	#move $a0, $s0
 	#li $a1, 6
 	#li $a2, 6
-	#jal get_map_obj
+	#jal get_map_obj	
 	#move $a0, $v0
 	#jal print_object
 
@@ -297,6 +300,17 @@ err_re:
 	
 	li $v0, 10
 	syscall
+	
+	.globl err_ind
+err_ind:
+	# Erro indice errado
+	li $v0, 4
+	la $a0, wi
+	syscall
+	
+	li $v0, 10
+	syscall
+	
 
 	.globl read_map_from_file
 read_map_from_file:
@@ -421,3 +435,29 @@ convert_done:
 	addi $a0, $a0, 1
 	move $v1, $a0	# Posicao final
 	jr   $ra
+	
+	.globl game_over
+game_over:
+	li $t0, 'r'
+	li $t1, 'q'
+	
+	li $v0, 4
+	la $a0, rest
+	syscall 
+	
+	li $v0, 12
+	syscall
+	
+	beq $t0, $v0, main	#restarta todo o game
+	
+	beq $t0, $v0, end
+	
+	li $v0, 4
+	la $a0, wc
+	syscall 
+	
+	j game_over
+	
+	end:
+	li $v0, 10	# Finaliza o jogo
+	syscall
