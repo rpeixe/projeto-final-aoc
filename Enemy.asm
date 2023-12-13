@@ -2,9 +2,9 @@
 yArea:		.asciiz "Character in area\n"
 nArea:		.asciiz "No character in area\n"
 	.align 2
-indice:	.space 100
-aux:	.space 100
-
+indice:	.space 100	#salvar na main dps($s1)
+aux:	.space 100		#salvar na main dps($s2)
+	
 	.text
 main:
 	#Teste enemy check area and move
@@ -39,6 +39,7 @@ main:
 	jal set_map_obj
 	#just for tests
 	
+	
 	##########
 	move $a0, $s0
 	li $a1, 2	#area inimigo
@@ -46,7 +47,7 @@ main:
 
 	beq $v0, 1, msgArea
 	
-	#personagem nao esta na area inimigo
+	#player nao esta na area inimigo
 	li $v0, 4
 	la $a0, nArea
 	syscall  
@@ -54,7 +55,7 @@ main:
 	li $v0, 10
 	syscall
 	
-	#personagem esta na area inimigo
+	#player esta na area inimigo
 	msgArea: 	#nao esta salvando movendo certo o objeto
 	li $v0, 4
 	la $a0, yArea
@@ -82,15 +83,15 @@ main:
 
 	.globl enemy_check_area
 enemy_check_area:  
-   #Recebe mapa $a0, $a1 area do inimgo, indice inimigo e indice personagem em $s1
+   #Recebe mapa $a0, $a1 area do inimgo, indice inimigo e indice player em $s1
 
-   #indices largura inimigo e personagem
+   #indices largura inimigo e player
    lw $t0, ($s1)
    lw $t1, 8($s1)
    li $t5, 0
    li $t2, 2
 
-   #Checa se personagem estï¿½ na largura da enemy_area
+   #Checa se player estï¿½ na largura da enemy_area
    sub $t0, $t0, $a1
    sub $t0, $t0, 1
    slt $t4, $t0, $t1
@@ -103,12 +104,12 @@ enemy_check_area:
    add $t5, $t5, $t4   #t5=2 se ambos sao validos
    bne $t2, $t5, notInArea
 
-   #indices altura inimigo e personagem
+   #indices altura inimigo e player
    lw $t0, 4($s1)
    lw $t1, 12($s1)
    li $t5, 0
 
-   #Checa se personagem esta na altura da enemy_area
+   #Checa se player esta na altura da enemy_area
    sub $t0, $t0, $a1
    sub $t0, $t0, 1
    slt $t4, $t0, $t1
@@ -121,88 +122,31 @@ enemy_check_area:
    add $t5, $t5, $t4   #t5=2 se ambos sao validos
    bne $t2, $t5, notInArea
 
-   li $v0, 1   #flag possui personagem na area
+   li $v0, 1   #flag possui player na area
 
    jr $ra
 	
 	.globl move_character
 move_character:  
-   #Mapa $a0, tenta mover personagem ou inimigo ($a1, $a2) para a direcao $a3
+   #Mapa $a0, tenta mover player ou inimigo ($a1, $a2) para a direcao $a3
    addi $sp, $sp, -4
 	sw $ra, ($sp)
 
    sw $a1, ($s2) 
-   sw $a2, 4($s2)
-   move $t1, $a1       #largura
-   move $t2, $a2       #altura
-   move $t3, $a1       
-   move $t4, $a2       
+   sw $a2, 4($s2)  
     
-   beq $a3, 1, leftDown
-   beq $a3, 2, down
-   beq $a3, 3, rightDown
-   beq $a3, 4, left
-   beq $a3, 5, stay
-   beq $a3, 6, right
-   beq $a3, 7, leftUp
-   beq $a3, 8, up
-   beq $a3, 9, rightUp
-   j err_ind
-    
-leftDown:	#sw $a1, ($s1)
-   sub $t1, $a1, 1
-   add $t2, $a2, 1
-   j ExitMove_character
-        
-down:
-   move $t1, $a1
-   add $t2, $a2, 1
-   j ExitMove_character
-    
-rightDown:
-   add $t1, $a1, 1
-   add $t2, $a2, 1
-   j ExitMove_character
-    
-left:
-   sub $t1, $a1, 1
-   move $t2, $a2
-   j ExitMove_character
-        
-stay:
-   li $v0, 1   #flag conseguiu mover
-    
-   jr $ra
-        
-right:
-   add $t1, $a1, 1
-   move $t2, $a2
-   j ExitMove_character
-    
-leftUp:
-   sub $t1, $a1, 1
-   sub $t2, $a2, 1
-   j ExitMove_character
-    
-up:
-   move $t1, $a1
-   sub $t2, $a2, 1
-   j ExitMove_character
-    
-rightUp:
-   add $t1, $a1, 1
-   sub $t2, $a2, 1
-   j ExitMove_character
-   
-ExitMove_character:
+	jal new_index_direction
+	beq $v0, 0, ExitMove_character
+	
    #novo indice
-   sw $t1, 8($s2)
-   sw $t2, 12($s2)
-   move $a1, $t1
-   move $a2, $t2
+   sw $v0, 8($s2)
+   sw $v1, 12($s2)
+   
+   move $a1, $v0
+   move $a2, $v1
    jal get_map_obj
     
-   lw $t1, 4($v0)
+   lw $t1, ($v0)
    beq $t1, 0, canMove
     
    li $v0, 0     #flag impossivel de mover
@@ -227,16 +171,85 @@ canMove:
    li $a3, 0
    jal set_map_obj
 	
+ExitMove_character:
 	lw $ra, ($sp)
 	addi $sp, $sp, 4
 	 
    li $v0, 1   #flag conseguiu mover
     
    jr $ra
+  
+   .globl new_index_direction
+new_index_direction:
+	#indice ($a1, $a2), dire�ao em $a3 e retorna o novo indice na dire�ao dada
+	move $t1, $a1       #largura
+   move $t2, $a2       #altura
+	
+	beq $a3, 1, leftDown
+   beq $a3, 2, down
+   beq $a3, 3, rightDown
+   beq $a3, 4, left
+   beq $a3, 5, stay
+   beq $a3, 6, right
+   beq $a3, 7, leftUp
+   beq $a3, 8, up
+   beq $a3, 9, rightUp
+   j err_ind
+    
+leftDown:	#sw $a1, ($s1)
+   sub $t1, $a1, 1
+   add $t2, $a2, 1
+   j ExitMove_new_index
+        
+down:
+   move $t1, $a1
+   add $t2, $a2, 1
+   j ExitMove_new_index
+    
+rightDown:
+   add $t1, $a1, 1
+   add $t2, $a2, 1
+   j ExitMove_new_index
+    
+left:
+   sub $t1, $a1, 1
+   move $t2, $a2
+   j ExitMove_new_index
+        
+stay:
+   li $v0, 1   #flag conseguiu mover
+    
+   jr $ra
+        
+right:
+   add $t1, $a1, 1
+   move $t2, $a2
+   j ExitMove_new_index
+    
+leftUp:
+   sub $t1, $a1, 1
+   sub $t2, $a2, 1
+   j ExitMove_new_index
+    
+up:
+   move $t1, $a1
+   sub $t2, $a2, 1
+   j ExitMove_new_index
+    
+rightUp:
+   add $t1, $a1, 1
+   sub $t2, $a2, 1
+   j ExitMove_new_index
+
+ExitMove_new_index:
+	move $v0, $t1		#largura
+	move $v1, $t1		#altura
+
+	jr $ra
 
 	.globl enemy_move
 enemy_move:
-   #Calcula o movimento do inimigo, recebe mapa $a0, area inimigo $a1, indice inimigo e indice personagem em $s1
+   #Calcula o movimento do inimigo, recebe mapa $a0, area inimigo $a1, indice inimigo e indice player em $s1
 	addi $sp, $sp, -4
 	sw $ra, ($sp)
 
@@ -258,7 +271,7 @@ enemy_move:
    ble $zero, $t1, leftMove		#Inimigo>Personagem, mova para a esquerda
    
 enemyCanAtack:
-	li $v0, 2		# indice que inimigo pode atacar personagem
+	li $v0, 2		# indice que inimigo pode atacar player
    
    j endEnemyMove
 endLargura: 
@@ -329,7 +342,7 @@ endEnemyMove:
 
 	.globl notInArea
 notInArea:
-   li $v0, 0   #flag nao possui personagem na area
+   li $v0, 0   #flag nao possui player na area
 
    jr $ra
    
@@ -419,3 +432,5 @@ remove_object:
 	addi $sp, $sp, 4
 	
 	jr $ra
+	
+
