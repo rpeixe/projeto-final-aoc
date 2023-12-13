@@ -1,11 +1,12 @@
 #################################################################################
 # Objeto de Jogo (12 bytes)							#
 #										#
-# Define um objeto genérico no mundo do jogo					#
+# Define um objeto genï¿½rico no mundo do jogo					#
 #										#
 # Estrutura:									#
 # Tipo - posicao 0, 4 bytes - o tipo de objeto					#
-# ASCII - posicao 4, 4 bytes - o caracter ascii que representa o objeto		#
+# ASCII - posicao 4, 4 bytes - o caracter ascii que representa o objeto,	#
+#	  nao mais utilizado							#
 # Ref - posicao 8, 4 bytes - endereco de memoria que contem objeto especifico	#
 #										#
 # Tipos:									#
@@ -54,10 +55,11 @@ oob:	.asciiz "Error: out of bounds\n"
 ut:	.asciiz "Error: unknown object type\n"
 nan:	.asciiz "Error: not a number\n"
 re:	.asciiz "Error: read error\n"
+pnf:	.asciiz "Error: player not found\n"
 wi:	.asciiz "Error: wrong index\n"
 wc:	.asciiz "Wrong character, type again"
 file:	.asciiz "map.txt"
-rest: .asciiz "Press r to restart the game or q to quit\n"
+rest:	.asciiz "Press r to restart the game or q to quit\n"
 	.align 2
 buf:	.space 8196	# Maximo 64x64
 	.align 2
@@ -247,6 +249,65 @@ get_map_obj:
 	addi $sp, $sp, 4
 	jr $ra
 	
+	.globl get_player
+get_player:
+	# Busca o player no mapa $a0 e retorna em $v0
+	
+	# Guarda os $s e o $ra na stack
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	addi $sp, $sp, -4
+	sw $s0, ($sp)
+	addi $sp, $sp, -4
+	sw $s1, ($sp)
+	addi $sp, $sp, -4
+	sw $s2, ($sp)
+	addi $sp, $sp, -4
+	sw $s3, ($sp)
+	addi $sp, $sp, -4
+	sw $s4, ($sp)
+	
+	lw $s0, ($a0)
+	lw $s1, 4($a0)
+	lw $s2, 8($a0)
+	
+	li $s3, 0
+	li $s4, 0
+get_player_loop:
+	beq $s3, $s1, get_player_loop_line_done
+	beq $s4, $s2, get_player_loop_error
+	
+	move $a1, $s3
+	move $a2, $s4
+	jal get_map_obj
+	lw $t0, ($v0)
+	beq $t0, 2, get_player_loop_done
+	
+	addi $s3, $s3, 1
+	j get_player_loop
+get_player_loop_line_done:
+	li $s3, 0
+	addi $s4, $s4, 1
+	j get_player_loop
+get_player_loop_done:
+	# Restaura os $s e o $ra
+	lw $s4, ($sp)
+	addi $sp, $sp, 4
+	lw $s3, ($sp)
+	addi $sp, $sp, 4
+	lw $s2, ($sp)
+	addi $sp, $sp, 4
+	lw $s1, ($sp)
+	addi $sp, $sp, 4
+	lw $s0, ($sp)
+	addi $sp, $sp, 4
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
+	
+	jr $ra
+get_player_loop_error:
+	j err_pnf
+	
 	.globl set_map_obj
 set_map_obj:
 	# Coloca o objeto $a3 no mapa $a0 na posicao ($a1, $a2)
@@ -306,6 +367,16 @@ err_ind:
 	# Erro indice errado
 	li $v0, 4
 	la $a0, wi
+	syscall
+	
+	li $v0, 10
+	syscall
+
+	.globl err_pnf
+err_pnf:
+	# Erro caso player nao seja encontrado
+	li $v0, 4
+	la $a0, pnf
 	syscall
 	
 	li $v0, 10
