@@ -1,7 +1,7 @@
 #################################################################################
 # Objeto de Jogo (12 bytes)							#
 #										#
-# Define um objeto gen�rico no mundo do jogo					#
+# Define um objeto gen?rico no mundo do jogo					#
 #										#
 # Estrutura:									#
 # Tipo - posicao 0, 4 bytes - o tipo de objeto					#
@@ -57,9 +57,11 @@ nan:	.asciiz "Error: not a number\n"
 re:	.asciiz "Error: read error\n"
 pnf:	.asciiz "Error: player not found\n"
 wi:	.asciiz "Error: wrong index\n"
-wc:	.asciiz "Wrong character, type again"
 file:	.asciiz "map.txt"
-rest:	.asciiz "Press r to restart the game or q to quit\n"
+gm1:	.asciiz "Desafiou a masmorra, encontrou seu fim\n"
+gm2:	.asciiz "Voce morreu\n"
+rest:	.asciiz "Pressione r para recomecar o jogo ou q para desistir\n"
+wc:	.asciiz "Letra invalida, digite novamente"
 	.align 2
 buf:	.space 8196	# Maximo 64x64
 	.align 2
@@ -509,6 +511,16 @@ convert_done:
 	
 	.globl game_over
 game_over:
+	li $v0, 4
+	la $a0, gm1
+	syscall
+	
+	li $v0, 4
+	la $a0, gm2
+	syscall
+	
+	loopGM:
+	
 	li $t0, 'r'
 	li $t1, 'q'
 	
@@ -525,9 +537,9 @@ game_over:
 	
 	li $v0, 4
 	la $a0, wc
-	syscall 
+	syscall
 	
-	j game_over
+	j loopGM
 	
 	end:
 	li $v0, 10	# Finaliza o jogo

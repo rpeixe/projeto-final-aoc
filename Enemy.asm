@@ -1,6 +1,11 @@
 	.data
-yArea:		.asciiz "Character in area\n"
-nArea:		.asciiz "No character in area\n"
+#yArea:		.asciiz "Character in area\n"
+#nArea:		.asciiz "No character in area\n"
+enAttkdamage1:	.asciiz "O inimigo consegue arranhar uma parte do seu corpo, causando "
+enAttkdamage2:	.asciiz " de dano\n"
+enAttkenem1:		.asciiz "Deixando voce com "
+enAttkenem2:		.asciiz " de vida\n"
+
 	.align 2
 indice:	.space 100	#salvar na main dps($s1)
 aux:	.space 100		#salvar na main dps($s2)
@@ -48,24 +53,19 @@ main:
 	beq $v0, 1, msgArea
 	
 	#player nao esta na area inimigo
-	li $v0, 4
-	la $a0, nArea
-	syscall  
 	
 	li $v0, 10
 	syscall
 	
 	#player esta na area inimigo
 	msgArea: 	#nao esta salvando movendo certo o objeto
-	li $v0, 4
-	la $a0, yArea
-	syscall
 	
 	move $a0, $s0
 	li $a1, 2		#area inimigo
 	jal enemy_move	#envia mapa em $a0, area $a1 e indices em $s1
 	
-	beq $v0, 2, atack_character	
+	move $a0, $s0
+	beq $v0, 2, enemy_attack
 	###########
 	move $a0, $s0
 	li $a1, 6
@@ -346,10 +346,46 @@ notInArea:
 
    jr $ra
    
-	.globl atack_character
-	
-atack_character:
+   .globl enemy_attack
+enemy_attack:
 	#Mapa $a0, atacante e defensor em $s1, em ordem ((x,y),(x,y))
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	
+	jal atack_character
+		
+	li $v0, 4
+	la $a0, enAttkdamage1
+	syscall
+	
+	li $v0, 1
+	move $a0, $v0
+	syscall
+	
+	li $v0, 4
+	la $a0, enAttkdamage2
+	syscall
+	
+	li $v0, 4
+	la $a0, enAttkenem1
+	syscall
+	
+	li $v0, 1
+	move $a0, $v1
+	syscall
+	
+	li $v0, 4
+	la $a0, enAttkenem2
+	syscall
+
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
+
+	jr $ra
+	
+	.globl atack_character
+atack_character:
+	#Mapa $a0, atacante e defensor em $s1, em ordem ((x,y),(x,y)) e retorna o dano dado e vida do defensor
 	addi $sp, $sp, -4
 	sw $ra, ($sp)
 
@@ -369,12 +405,15 @@ atack_character:
 	
 	li $t1, 0
 	lw $t3, 8($v0)
- 	#lw $t1, 12($v0)	#defesa	
+ 	lw $t1, 12($v0)	#defesa	
 	lw $t2, ($t3)	#vida atual
 	move $t0, $s2
 	
 	sub $t0, $t0, $t1	
 	sub $t2, $t2, $t0
+	
+	sw $t0, 16($s1)
+	sw $t2, 20($s1)
 	
 	beq $t2, 0, remove_defender	#caso vida = 0 remova do mapa/memoria
 	
@@ -389,6 +428,9 @@ atack_character:
 
 	end_attack_character:
 
+	lw $v0, 16($s1)		#dano dado
+	lw $v1, 20($s1)		#vida do defensor depois
+	
 	lw $ra, ($sp)
 	addi $sp, $sp, 4
 	jr $ra
