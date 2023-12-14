@@ -7,7 +7,9 @@ enAttkenem1:		.asciiz "Deixando voce com "
 enAttkenem2:		.asciiz " de vida\n"
 
 	.align 2
+	.globl indice
 indice:	.space 100	#salvar na main dps($s1)
+	.globl aux
 aux:	.space 100		#salvar na main dps($s2)
 	
 	.text
@@ -129,14 +131,14 @@ enemy_check_area:
 	.globl move_character
 move_character:  
    #Mapa $a0, tenta mover player ou inimigo ($a1, $a2) para a direcao $a3
-   addi $sp, $sp, -4
+	addi $sp, $sp, -4
 	sw $ra, ($sp)
 
    sw $a1, ($s2) 
    sw $a2, 4($s2)  
     
 	jal new_index_direction
-	beq $v0, 0, ExitMove_character
+	#beq $v0, 0, ExitMove_character
 	
    #novo indice
    sw $v0, 8($s2)
@@ -151,9 +153,13 @@ move_character:
     
    li $v0, 0     #flag impossivel de mover
     
+   lw $ra, ($sp)
+   addi $sp, $sp, 4
+   
    jr $ra
     
 canMove:
+	move $t8, $v0
    #inidice original
    lw $a1, ($s2)
    lw $a2, 4($s2)
@@ -166,22 +172,24 @@ canMove:
    jal set_map_obj
     
    #atualiza a antiga posicao com chao
+   move $a3, $v0
+   
    lw $a1, ($s2)
    lw $a2, 4($s2)
-   li $a3, 0
+   move $a3, $t8
    jal set_map_obj
 	
 ExitMove_character:
-	lw $ra, ($sp)
-	addi $sp, $sp, 4
 	 
    li $v0, 1   #flag conseguiu mover
     
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
    jr $ra
   
    .globl new_index_direction
 new_index_direction:
-	#indice ($a1, $a2), direçao em $a3 e retorna o novo indice na direçao dada
+	#indice ($a1, $a2), direï¿½ao em $a3 e retorna o novo indice na direï¿½ao dada
 	move $t1, $a1       #largura
    move $t2, $a2       #altura
 	
@@ -243,7 +251,7 @@ rightUp:
 
 ExitMove_new_index:
 	move $v0, $t1		#largura
-	move $v1, $t1		#altura
+	move $v1, $t2		#altura
 
 	jr $ra
 

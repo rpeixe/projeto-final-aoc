@@ -167,6 +167,7 @@ create_enemy:
 	move $v0, $t1
 	jr $ra
 	
+	.globl create_object
 create_object:
 	# Cria um objeto com o tipo de $a0 e retorna em $v0
 	beq $a0, 0, create_floor

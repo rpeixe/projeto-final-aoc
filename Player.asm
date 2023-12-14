@@ -1,6 +1,6 @@
 #################################################################
-# C�digo de controle do jogador 
-# Cria o jogador no mapa e executa suas fun��es:
+# Codigo de controle do jogador 
+# Executa as funcoes do jogador:
 #  - Andar
 #  - Atacar
 #  - Defender
@@ -8,7 +8,7 @@
 #################################################################
 	.data
 wmove:			.asciiz "Voce tenta se mover, mas um obstaculo impenetravel bloqueia seu caminho\n"
-cmove:			.asciiz "Seu caminho esta livre! Voc� d� um passo � frente\n"
+cmove:			.asciiz "Seu caminho esta livre! Voce da um passo a frente\n"
 noneattk:		.asciiz "Voce tenta atacar uma mosca na caverna, errando e acertando nada\n"
 wallattk:		.asciiz "*TUCK!*, voce acertou a parede\n"
 plAttkdamage1:	.asciiz "Voce consegue atacar uma parte do monstro, causando "
@@ -29,6 +29,10 @@ main:
 	.globl player_move
 player_move:
 	#Mapa $a0, tenta mover player($a1, $a2) para a direcao $a3
+	
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	
 	jal move_character
 	
 	beq $v0, 0, player_wrong_move
@@ -39,6 +43,8 @@ player_move:
 	
 	li $v0, 1	#flag conseguiu mover
 	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 	jr $ra
 	
 	player_wrong_move:
@@ -48,11 +54,16 @@ player_move:
 	
 	li $v0, 0	#flag nao conseguiu mover
 	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 	jr $ra			#volta para receber o indice denovo de acao na main
 
 	.globl player_attack
 player_attack:
 	#Mapa $a0, indice player($a1, $a2) e direcao ataque $a3
+	
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
 	
 	sw $a1, ($s2)
 	sw $a2, 4($s2)
@@ -79,6 +90,8 @@ player_attack:
 	la $a0, noneattk		#talvez mover esta mesagem de erro pra main
 	syscall
 	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 	li $v0, 0	#nao conseguiu atacar
 	jr $ra
 	
@@ -87,6 +100,8 @@ player_attack:
 	la $a0, wallattk		#talvez mover esta mesagem de erro pra main
 	syscall
 	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 	li $v0, 0	#nao conseguiu atacar
 	jr $ra
 
@@ -131,6 +146,8 @@ player_attack:
 	la $a0, plAttkenem2
 	syscall
 	
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
 	li $v0, 1	#conseguiu atacar
 	jr $ra
 
