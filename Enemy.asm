@@ -93,7 +93,7 @@ enemy_check_area:
    li $t5, 0
    li $t2, 2
 
-   #Checa se player estï¿½ na largura da enemy_area
+   #Checa se player esta na largura da enemy_area
    sub $t0, $t0, $a1
    sub $t0, $t0, 1
    slt $t4, $t0, $t1
@@ -149,6 +149,7 @@ move_character:
    jal get_map_obj
     
    lw $t1, ($v0)
+   beq $t1, 4, victory
    beq $t1, 0, canMove
     
    li $v0, 0     #flag impossivel de mover
@@ -344,7 +345,7 @@ downMove:
    
 endEnemyMove:
    lw $ra, ($sp)
-	addi $sp, $sp, 8
+	addi $sp, $sp, 4
 	
    jr $ra
 
@@ -424,13 +425,6 @@ atack_character:
 	ble $t2, 0, remove_defender	#caso vida = 0 remova do mapa/memoria
 	
 	sw $t2, ($t3)	#ataualiza vida
-	#sw $t3, 8($v0)
-	
-	#move $a0, $s0
-	#lw $a1, 8($s1)
-	#lw $a2, 12($s1)
-	#move $a3, $v0
-	#jal set_map_obj
 
 	end_attack_character:
 
@@ -465,7 +459,7 @@ remove_object:
 	
 	lw $t3, ($a3)
 	
-	beq $t3, $t2, game_over		#caso esteja removendo player
+	beq $t3, $t2, game_over	#caso esteja removendo player
 
 	lw $t3, 8($a3)
 	sw $t1, ($t3)
@@ -481,4 +475,81 @@ remove_object:
 	
 	jr $ra
 	
-
+	.globl enemy_ai
+enemy_ai:
+	# Mapa em $s0, turno em $a1, calcula os movimentos de todos os inimigos no mapa
+	addi $sp, $sp, -4
+	sw $ra, ($sp)
+	addi $sp, $sp, -4
+	sw $s3, ($sp)
+	addi $sp, $sp, -4
+	sw $s4, ($sp)
+	addi $sp, $sp, -4
+	sw $s5, ($sp)
+	addi $sp, $sp, -4
+	sw $s6, ($sp)
+	addi $sp, $sp, -4
+	sw $s7, ($sp)
+	
+	lw $s3, 4($s0)	# largura
+	lw $s4, 8($s0)	# altura
+	li $s5, 0	# x
+	li $s6, 0	# y
+	move $s7, $a1	# rodada atual
+	
+enemy_ai_loop:
+	beq $s5, $s3, enemy_ai_line_done
+	beq $s6, $s4, enemy_ai_done
+	
+	move $a0, $s0
+	move $a1, $s5
+	move $a2, $s6
+	jal get_map_obj
+	lw $t0, ($v0)
+	bne $t0, 3, enemy_ai_loop_step	# Verifica se e inimigo
+	lw $t1, 8($v0)
+	lw $t2, 16($t1)
+	beq $t2, $s7, enemy_ai_loop_step	# Verifica se o inimigo ja agiu nessa rodada
+	sw $s7, 16($t1)	# Atualiza o ultimo turno do inimigo
+	
+	sw $s5, ($s1)
+	sw $s6, 4($s1)
+	lw $t3, px
+	lw $t4, py
+	sw $t3, 8($s1)
+	sw $t4, 12($s1)
+	move $a0, $s0
+	li $a1, 2
+	jal enemy_move	# Verifica a area e move
+	bne $v0, 2, enemy_ai_loop_step	# Verifica se o inimigo pode atacar
+	
+	sw $s5, ($s1)
+	sw $s6, 4($s1)
+	lw $t3, px
+	lw $t4, py
+	sw $t3, 8($s1)
+	sw $t4, 12($s1)
+	move $a0, $s0
+	li $a1, 2
+	jal enemy_attack
+enemy_ai_loop_step:
+	addi $s5, $s5, 1
+	j enemy_ai_loop
+enemy_ai_line_done:
+	li $s5, 0
+	addi $s6, $s6, 1
+	j enemy_ai_loop
+enemy_ai_done:
+	lw $s7, ($sp)
+	addi $sp, $sp, 4
+	lw $s6, ($sp)
+	addi $sp, $sp, 4
+	lw $s5, ($sp)
+	addi $sp, $sp, 4
+	lw $s4, ($sp)
+	addi $sp, $sp, 4
+	lw $s3, ($sp)
+	addi $sp, $sp, 4
+	lw $ra, ($sp)
+	addi $sp, $sp, 4
+	jr $ra

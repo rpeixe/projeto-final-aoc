@@ -1,12 +1,18 @@
 	.data
 
+	.globl px
 px:	.space 4
+	.globl py
 py:	.space 4
 
 cntrls:		.asciiz "Use o teclado numerico para se mover, A para atacar, C para cancelar\n"
 dng_ent:	.asciiz "Voce entrou na masmorra!\n"
 att_rdy:	.asciiz "Voce se prepara para atacar\n"
 att_cnc:	.asciiz "Voce cancela o ataque\n"
+gm1:	.asciiz "Desafiou a masmorra, encontrou seu fim\n"
+gm2:	.asciiz "Voce morreu\n"
+rest:	.asciiz "Pressione R para recomecar o jogo ou Q para sair\n"
+vict:	.asciiz "Parabens, voce desbravou a masmorra e conseguiu escapar!\n"
 
 .text
 	.globl main
@@ -15,7 +21,7 @@ main:
 	# $s1: Auxiliar
 	# $s2: Auxiliar
 	# $s3: Player
-	# $s4: Bit pronto
+	# $s4: Turno atual
 	# $s5: Tecla apertada
 	# $s6: Flag se o turno do player acabou
 	# $s7: Flag de ataque
@@ -46,6 +52,7 @@ main:
 	jal get_map_obj
 	move $s3, $v0
 	
+	li $s4, 1	# Turno atual
 	li $s6, 0	# Flag se o turno do player acabou
 	li $s7, 0	# Flag de ataque
 	
@@ -57,14 +64,14 @@ player_turn:	# Inicio do turno do player
 	li $s7, 0
 	j enemy_turn
 wait_input:
-	lw $s4, 0xffff0000
-	beq $s4, 0, wait_input	# Pooling de entrada
+	lw $t0, 0xffff0000	# Bit de pronto
+	beq $t0, 0, wait_input	# Pooling de entrada
 input_received:
 	sw $zero, 0xffff0000	# Limpa o ready bit
 	lw $s5, 0xffff0004
 	sw $zero, 0xffff0004	# Limpa o input
-	sge $t0, $s5, 48
-	sle $t1, $s5, 57
+	sge $t0, $s5, '1'
+	sle $t1, $s5, '9'
 	and $t0, $t0, $t1
 	bne $t0, $zero, direction	# Verifica se e direcao
 	
@@ -123,14 +130,63 @@ attack_direction:
 	j player_turn
 	
 enemy_turn:
+	move $a0, $s0
+	move $a1, $s4
+	lw $a2, px
+	lw $a3, py
+	jal enemy_ai
 end_turn:
 	move $a0, $s0
 	jal draw_map	# Atualiza o bitmap display
 	
 	li $s6, 0
+	addi $s4, $s4, 1	# Atualiza o turno atual
 	j player_turn
 
-exit:
-	li $v0, 10	# Finaliza o programa
+
+	.globl game_over
+game_over:
+	li $v0, 4
+	la $a0, gm1
 	syscall
+	
+	li $v0, 4
+	la $a0, gm2
+	syscall
+	
+	li $v0, 4
+	la $a0, rest
+	syscall 
+	
+loopGM:
+	lw $t0, 0xffff0000	# Bit de pronto
+	beq $t0, 0, loopGM	# Pooling de entrada
+	
+	sw $zero, 0xffff0000	# Limpa o ready bit
+	lw $s5, 0xffff0004
+	sw $zero, 0xffff0004	# Limpa o input
+	
+	beq $s5, 'r', main	#restarta todo o game
+	beq $s5, 'R', main	#restarta todo o game
+	beq $s5, 'q', end
+	beq $s5, 'Q', end
+	j loopGM
+	
+end:
+	li $v0, 10	# Finaliza o jogo
+	syscall
+
+	.globl victory
+victory:
+	jal draw_map
+
+	li $v0, 4
+	la $a0, vict
+	syscall
+	
+	li $v0, 4
+	la $a0, rest
+	syscall
+
+	j loopGM
 	

@@ -14,6 +14,9 @@
 # 1 - Parede (impassavel)							#
 # 2 - Player									#
 # 3 - Inimigo									#
+# 4 - Porta									#
+#################################################################################
+################	Tipos especificos	#################################
 #################################################################################
 # Player (28 bytes)								#
 #										#
@@ -29,7 +32,7 @@
 # Destreza - posicao 20, 4 bytes						#
 # Inteligencia - posicao 24, 4 bytes						#
 #################################################################################
-# Inimigo (16 bytes)								#
+# Inimigo (20 bytes)								#
 #										#
 # Define um inimigo no mundo do jogo						#
 #										#
@@ -38,6 +41,7 @@
 # Vida maxima - posicao 4, 4 bytes						#
 # Dano - posicao 8, 4 bytes							#
 # Armadura - posicao 12, 4 bytes - reducao de dano				#
+# Turno - posicao 16, 4 bytes - ultimo turno que agiu				#
 #################################################################################
 #################################################################################
 # Mapa (12 bytes)								#
@@ -58,29 +62,12 @@ re:	.asciiz "Error: read error\n"
 pnf:	.asciiz "Error: player not found\n"
 wi:	.asciiz "Error: wrong index\n"
 file:	.asciiz "map.txt"
-gm1:	.asciiz "Desafiou a masmorra, encontrou seu fim\n"
-gm2:	.asciiz "Voce morreu\n"
-rest:	.asciiz "Pressione r para recomecar o jogo ou q para desistir\n"
-wc:	.asciiz "Letra invalida, digite novamente"
 	.align 2
-buf:	.space 8196	# Maximo 64x64
+buf:	.space 534	# Maximo 16x16
 	.align 2
-buf_s:	.word 8196
+buf_s:	.word 534
 	
 	.text
-main:
-	#jal read_map_from_file
-	#move $s0, $v0
-	
-	#move $a0, $s0
-	#li $a1, 6
-	#li $a2, 6
-	#jal get_map_obj	
-	#move $a0, $v0
-	#jal print_object
-
-	#li $v0, 10	# Finaliza o programa
-	#syscall
 	
 	.globl create_floor
 create_floor:
@@ -127,11 +114,11 @@ create_player:
 	li $a0, 16
 	syscall
 	
-	# 3 de vida, 1 de dano, 0 de armadura
-	li $t0, 3
+	# 10 de vida, 2 de dano, 0 de armadura
+	li $t0, 10
 	sw $t0, ($v0)
 	sw $t0, 4($v0)
-	li $t0, 1
+	li $t0, 2
 	sw $t0, 8($v0)
 	sw $v0, 8($t1)
 	
@@ -153,7 +140,7 @@ create_enemy:
 	
 	move $t1, $v0
 	li $v0, 9
-	li $a0, 16
+	li $a0, 20
 	syscall
 	
 	# 3 de vida, 1 de dano, 0 de armadura
@@ -167,6 +154,20 @@ create_enemy:
 	move $v0, $t1
 	jr $ra
 	
+	.globl create_door
+create_door:
+	# Cria uma porta e retorna seu endereco em $v0
+	li $v0, 9
+	li $a0, 12
+	syscall
+	
+	li $t0, 4
+	sw $t0, ($v0)
+	li $t0, 'd'
+	sw $t0, 4($v0)
+	
+	jr $ra
+	
 	.globl create_object
 create_object:
 	# Cria um objeto com o tipo de $a0 e retorna em $v0
@@ -174,6 +175,7 @@ create_object:
 	beq $a0, 1, create_wall
 	beq $a0, 2, create_player
 	beq $a0, 3, create_enemy
+	beq $a0, 4, create_door
 	j err_ut
 	
 	.globl print_object
@@ -513,38 +515,3 @@ convert_done:
 	move $v1, $a0	# Posicao final
 	jr   $ra
 	
-	.globl game_over
-game_over:
-	li $v0, 4
-	la $a0, gm1
-	syscall
-	
-	li $v0, 4
-	la $a0, gm2
-	syscall
-	
-	loopGM:
-	
-	li $t0, 'r'
-	li $t1, 'q'
-	
-	li $v0, 4
-	la $a0, rest
-	syscall 
-	
-	li $v0, 12
-	syscall
-	
-	beq $t0, $v0, main	#restarta todo o game
-	
-	beq $t0, $v0, end
-	
-	li $v0, 4
-	la $a0, wc
-	syscall
-	
-	j loopGM
-	
-	end:
-	li $v0, 10	# Finaliza o jogo
-	syscall

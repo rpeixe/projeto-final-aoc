@@ -16,9 +16,6 @@ plAttkdamage2:	.asciiz " de dano\n"
 plAttkenem1:		.asciiz "Deixando o inimigo com "
 plAttkenem2:		.asciiz " de vida\n"
 
-	.globl Player	
-Player: .space 28
-
 	.text
 
 main:
@@ -121,13 +118,15 @@ player_attack:
 	move $a0, $s0
 	
 	jal atack_character
+	move $t0, $v0
+	move $t1, $v1
 	
 	li $v0, 4
 	la $a0, plAttkdamage1
 	syscall
 	
 	li $v0, 1
-	move $a0, $v0
+	move $a0, $t0
 	syscall
 	
 	li $v0, 4
@@ -139,7 +138,7 @@ player_attack:
 	syscall
 	
 	li $v0, 1
-	move $a0, $v1
+	move $a0, $t1
 	syscall
 	
 	li $v0, 4

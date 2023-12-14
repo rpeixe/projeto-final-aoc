@@ -74,6 +74,7 @@ draw_object:
 	beq $a1, 1, draw_wall
 	beq $a1, 2, draw_player
 	beq $a1, 3, draw_enemy
+	beq $a1, 4, draw_door
 	j err_ut
 	
 	.globl draw_map
@@ -832,6 +833,151 @@ draw_enemy:
 	addi $a0, $a0, 4
 	sw $t0, ($a0)
 	addi $a0, $a0, 4
+	
+	jr $ra
+	
+	.globl draw_door
+draw_door:
+	# Recebe o primeiro endereco em $a0
+	lw $t2, brown
+	lw $t3, yellow
+	lw $t4, gray
+	
+	# Linha 1
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 2
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 3
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 5
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t3, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 6
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 7
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
+	addi $a0, $a0, 484
+	# Linha 8
+	sw $t4, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t2, ($a0)
+	addi $a0, $a0, 4
+	sw $t4, ($a0)
 	
 	jr $ra
 	
