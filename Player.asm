@@ -18,11 +18,6 @@ plAttkenem2:		.asciiz " de vida\n"
 
 	.text
 
-main:
-	
-	li $v0, 10
-	syscall
-
 	.globl player_move
 player_move:
 	#Mapa $a0, tenta mover player($a1, $a2) para a direcao $a3

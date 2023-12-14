@@ -17,15 +17,6 @@ brown:	.word 0x915b3a
 b_add:	.word 0x10000000
 
 	.text
-main:
-	jal read_map_from_file
-	move $s0, $v0
-	
-	move $a0, $s0
-	jal draw_map
-	
-	li $v0, 10	# Finaliza o programa
-	syscall
 	
 	.globl clear_screen
 clear_screen:
