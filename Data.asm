@@ -1,7 +1,7 @@
 #################################################################################
 # Objeto de Jogo (12 bytes)							#
 #										#
-# Define um objeto gen?rico no mundo do jogo					#
+# Define um objeto generico no mundo do jogo					#
 #										#
 # Estrutura:									#
 # Tipo - posicao 0, 4 bytes - o tipo de objeto					#
@@ -251,9 +251,9 @@ get_map_obj:
 	addi $sp, $sp, 4
 	jr $ra
 	
-	.globl get_player
-get_player:
-	# Busca o player no mapa $a0 e retorna em $v0
+	.globl get_player_pos
+get_player_pos:
+	# Busca o player no mapa $a0 e retorna sua posicao em ($v0, $v1)
 	
 	# Guarda os $s e o $ra na stack
 	addi $sp, $sp, -4
@@ -292,6 +292,9 @@ get_player_loop_line_done:
 	addi $s4, $s4, 1
 	j get_player_loop
 get_player_loop_done:
+	move $v0, $s3
+	move $v1, $s4
+
 	# Restaura os $s e o $ra
 	lw $s4, ($sp)
 	addi $sp, $sp, 4

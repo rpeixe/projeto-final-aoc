@@ -1,6 +1,6 @@
 #################################################################
-# Código de controle do jogador 
-# Cria o jogador no mapa e executa suas funções:
+# Cï¿½digo de controle do jogador 
+# Cria o jogador no mapa e executa suas funï¿½ï¿½es:
 #  - Andar
 #  - Atacar
 #  - Defender
@@ -8,7 +8,7 @@
 #################################################################
 	.data
 wmove:			.asciiz "Voce tenta se mover, mas um obstaculo impenetravel bloqueia seu caminho\n"
-cmove:			.asciiz "Seu caminho esta livre! Você dá um passo à frente\n"
+cmove:			.asciiz "Seu caminho esta livre! Vocï¿½ dï¿½ um passo ï¿½ frente\n"
 noneattk:		.asciiz "Voce tenta atacar uma mosca na caverna, errando e acertando nada\n"
 wallattk:		.asciiz "*TUCK!*, voce acertou a parede\n"
 plAttkdamage1:	.asciiz "Voce consegue atacar uma parte do monstro, causando "
@@ -48,11 +48,11 @@ player_move:
 	
 	li $v0, 0	#flag nao conseguiu mover
 	
-	jr $ra			#volta para receber o indice denovo de açao na main
+	jr $ra			#volta para receber o indice denovo de acao na main
 
 	.globl player_attack
 player_attack:
-	#Mapa $a0, indice player($a1, $a2) e direção ataque $a3
+	#Mapa $a0, indice player($a1, $a2) e direcao ataque $a3
 	
 	sw $a1, ($s2)
 	sw $a2, 4($s2)
