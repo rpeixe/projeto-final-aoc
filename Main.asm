@@ -3,6 +3,11 @@
 px:	.space 4
 py:	.space 4
 
+cntrls:		.asciiz "Use o teclado numerico para se mover, A para atacar, C para cancelar\n"
+dng_ent:	.asciiz "Voce entrou na masmorra!\n"
+att_rdy:	.asciiz "Voce se prepara para atacar\n"
+att_cnc:	.asciiz "Voce cancela o ataque\n"
+
 .text
 	.globl main
 main:
@@ -14,6 +19,15 @@ main:
 	# $s5: Tecla apertada
 	# $s6: Flag se o turno do player acabou
 	# $s7: Flag de ataque
+	
+	li $v0, 4
+	la $a0, cntrls
+	syscall
+	
+	li $v0, 4
+	la $a0, dng_ent
+	syscall
+	
 
 	jal read_map_from_file	# Le o mapa do arquivo map.txt na pasta raiz do Mars
 	move $s0, $v0
@@ -64,10 +78,20 @@ input_received:
 
 attack:
 	li $s7, 1
+	
+	li $v0, 4
+	la $a0, att_rdy
+	syscall
+	
 	j player_turn
 
 cancel:
 	li $s7, 0
+	
+	li $v0, 4
+	la $a0, att_cnc
+	syscall
+	
 	j player_turn
 
 direction:

@@ -403,8 +403,7 @@ atack_character:
 	jal get_map_obj
 	
 	lw $t3, 8($v0)
-	lw $t0, 8($t3)	#ataque
-	move $s2, $t0
+	lw $t8, 8($t3)	#ataque
 	
 	move $a0, $s0
 	lw $a1, 8($s1)
@@ -413,26 +412,25 @@ atack_character:
 	
 	li $t1, 0
 	lw $t3, 8($v0)
- 	lw $t1, 12($v0)	#defesa	
+ 	lw $t1, 12($t3)	#defesa	
 	lw $t2, ($t3)	#vida atual
-	move $t0, $s2
 	
-	sub $t0, $t0, $t1	
-	sub $t2, $t2, $t0
+	sub $t8, $t8, $t1	
+	sub $t2, $t2, $t8
 	
-	sw $t0, 16($s1)
+	sw $t8, 16($s1)
 	sw $t2, 20($s1)
 	
-	beq $t2, 0, remove_defender	#caso vida = 0 remova do mapa/memoria
+	ble $t2, 0, remove_defender	#caso vida = 0 remova do mapa/memoria
 	
 	sw $t2, ($t3)	#ataualiza vida
-	sw $t3, 8($v0)
+	#sw $t3, 8($v0)
 	
-	move $a0, $s0
-	lw $a1, 8($s1)
-	lw $a2, 12($s1)
-	move $a3, $v0
-	jal set_map_obj
+	#move $a0, $s0
+	#lw $a1, 8($s1)
+	#lw $a2, 12($s1)
+	#move $a3, $v0
+	#jal set_map_obj
 
 	end_attack_character:
 
