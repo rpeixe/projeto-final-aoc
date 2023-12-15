@@ -502,7 +502,7 @@ convert_line:
 	li   $t0, 10	# Base 10
 convert_loop:
 	lb   $t1, ($a0)
-	beq  $t1, 13, convert_done	# Fim da linha
+	beq  $t1, 10, convert_done	# Fim da linha
 
 	addi  $t1, $t1, -48	# Converte em inteiro
 	mul  $v0, $v0, $t0	# Multiplica pela base
@@ -511,7 +511,6 @@ convert_loop:
 	addi $a0, $a0, 1
 	j    convert_loop
 convert_done:
-	addi $a0, $a0, 1
 	move $v1, $a0	# Posicao final
 	jr   $ra
 	
